@@ -1,0 +1,45 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    paths:
+      - "src/**"
+      - "pom.xml"
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build with Maven
+        run: mvn clean package -DskipTests
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build and Push Docker Image
+        run: |
+          IMAGE_TAG=$(date +%Y%m%d%H%M%S)
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/demo-kafka-producer:$IMAGE_TAG .
+          docker tag ${{ secrets.DOCKER_USERNAME }}/demo-kafka-producer:$IMAGE_TAG ${{ secrets.DOCKER_USERNAME }}/demo-kafka-producer:latest
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          docker push ${{ secrets.DOCKER_USERNAME }}/demo-kafka-producer:$IMAGE_TAG
+          docker push ${{ secrets.DOCKER_USERNAME }}/demo-kafka-producer:latest
+
+      - name: Trigger Helm Deployment in `helm-repo`
+        run: |
+          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               https://api.github.com/repos/<your-org>/helm-repo/actions/workflows/deploy-helm.yaml/dispatches \
+               -d '{"ref": "main", "inputs": {"imageTag": "'${{ env.IMAGE_TAG }}'"}}'
