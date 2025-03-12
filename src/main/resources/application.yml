@@ -21,7 +21,7 @@ spring:
       static-locations:
         - classpath:/demo-kafka-producer/static/
 
-tpcmp:
+dev:
   kafka:
     bootstrap-servers: ${BOOTSTRAP_SERVERS}   # Inject from GitHub Secrets
     jaas-user: ${KAFKA_USERNAME}

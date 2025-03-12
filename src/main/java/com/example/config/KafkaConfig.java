@@ -3,7 +3,7 @@ package com.example.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-@ConfigurationProperties(prefix = "tpcmp.kafka")
+@ConfigurationProperties(prefix = "dev.kafka")
 @Component
 public class KafkaConfig {
 
@@ -33,6 +33,10 @@ public class KafkaConfig {
     public String getSeekTo() { return seekTo; }
     public Security getSecurity() { return security; }
     public ProducerProperties getProperties() { return properties; }
+    public String getMaxPollRecords() { return maxPollRecords; }
+    public String getConsumersCount() { return consumersCount; }
+    public String getGroupId() { return groupId; }
+    public String getAutoOffsetReset() { return autoOffsetReset; }
 
     public static class Topics {
         private String if5;
