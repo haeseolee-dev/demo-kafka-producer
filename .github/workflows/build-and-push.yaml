@@ -3,9 +3,9 @@ name: Build and Push Docker Image
 
 on:
   push:
-    paths:
-      - "src/**"
-      - "pom.xml"
+    # paths:
+    #   - "src/**"
+    #   - "pom.xml"
     branches:
       - main
 
