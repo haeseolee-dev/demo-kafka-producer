@@ -1,0 +1,57 @@
+camel:
+  springboot:
+    name: demo-kafka-producer
+  servlet:
+    mapping:
+      context-path: /demo-kafka-producer/*
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, loggers, prometheus
+
+spring:
+  mvc:
+    static-path-pattern: /demo-kafka-producer/static/**
+
+  web:
+    resources:
+      add-mappings: true
+      static-locations:
+        - classpath:/demo-kafka-producer/static/
+
+tpcmp:
+  kafka:
+    bootstrap-servers: <kafka-cluster>-kafka-bootstrap.kafka.svc.cluster.local:9092   # FQDN of Kafka bootstrap service
+    jaas-user: <kafka-user>
+    jaas-password: <kafka-user-password>
+    auto-offset-reset: latest
+    max-poll-records: 500
+    consumers-count: 1
+    group-id: <kafka-user-group>
+    seek-to: end
+    topics:
+      if5: <kafka-topic>
+
+    ## IMPORTANT
+    security:
+      protocol: SASL_PLAINTEXT
+    properties:
+      sasl:
+        mechanism: SCRAM-SHA-512
+        jaas.config: org.apache.kafka.common.security.scram.ScramLoginModule required username="<kafka-user>" password="<kafka-user-password>";
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+jasypt:
+  encryptor:
+    bean: jasyptStringEncryptor
+    password: tpcmp
+
+server:
+  max-http-header-size: 10000000
+
+logging.config: classpath:logback-prd.xml
