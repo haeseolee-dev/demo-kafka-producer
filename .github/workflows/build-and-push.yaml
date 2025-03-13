@@ -69,7 +69,7 @@ jobs:
 
       - name: Update `kustomization.yaml`
         run: |
-          cd helm-repo/overlays/dev/
+          cd overlays/dev/
           sed -i "s|newTag: .*|newTag: \"${{ env.IMAGE_TAG }}\"|" kustomization.yaml
           git diff
 
