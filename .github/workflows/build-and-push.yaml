@@ -5,9 +5,6 @@ on:
     branches:
       - main
 
-env:
-  IMAGE_TAG: $(date +%Y%m%d%H%M%S)
-
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -25,10 +22,13 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Generate Image Tag ✅
+        run: echo "IMAGE_TAG=$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
+
       - name: Build with Maven
         run: mvn clean package -DskipTests -P production
 
-      # Authenticate with Azure using OIDC (Correct Fix)
+      # Authenticate with Azure using OIDC
       - name: Log in to Azure
         uses: azure/login@v1
         with:
@@ -48,11 +48,10 @@ jobs:
           # Ensure the JAR file exists before Docker build
           ls -l target/
           
-          # Build the Docker image with the correct JAR file path
+          # Build the Docker image
           docker build --build-arg JAR_FILE=$JAR_FILE -t $ACR_IMAGE:$IMAGE_TAG .
           
           docker tag $ACR_IMAGE:$IMAGE_TAG $ACR_IMAGE:latest
-          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
           
           docker push $ACR_IMAGE:$IMAGE_TAG
           docker push $ACR_IMAGE:latest
@@ -87,7 +86,5 @@ jobs:
           git config --global user.email "github-actions@github.com"
           git config --global user.name "github-actions"
           git add overlays/dev/kustomization.yaml
-          git commit -m "Update image tag to ${{ env.IMAGE_TAG }}"
+          git commit -m "fix: update image tag to ${{ env.IMAGE_TAG }}"
           git push origin main
-
-
