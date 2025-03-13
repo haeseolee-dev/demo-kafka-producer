@@ -39,12 +39,13 @@ jobs:
         run: |
           IMAGE_TAG=$(date +%Y%m%d%H%M%S)
           ACR_IMAGE=${{ secrets.ACR_LOGIN_SERVER }}/demo-kafka-producer
+          JAR_PATH="target/demo-kafka-producer.jar"
           
           # Ensure the JAR file exists before Docker build
           ls -l target/
           
           # Build the Docker image with the correct context
-          docker build --build-arg JAR_FILE=target/demo-kafka-producer.jar -t $ACR_IMAGE:$IMAGE_TAG .
+          docker build --build-arg JAR_FILE=$JAR_PATH -t $ACR_IMAGE:$IMAGE_TAG .
           
           docker tag $ACR_IMAGE:$IMAGE_TAG $ACR_IMAGE:latest
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
