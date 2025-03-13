@@ -77,7 +77,6 @@ jobs:
           ACR_IMAGE_NAME: ${{ secrets.ACR_LOGIN_SERVER }}/demo-kafka-producer
           IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
         run: |
-          cd overlays/dev/
           if grep -q "name: $ACR_IMAGE_NAME" kustomization.yaml; then
             sed -i "s|newTag: .*|newTag: \"$IMAGE_TAG\"|" kustomization.yaml
           else
@@ -90,6 +89,6 @@ jobs:
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "github-actions"
-          git add overlays/dev/kustomization.yaml
+          git add kustomization.yaml
           git commit -m "Update image tag to ${{ needs.build-and-push.outputs.image_tag }}"
           git push origin main
