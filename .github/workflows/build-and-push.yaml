@@ -59,6 +59,6 @@ jobs:
         run: |
           curl -X POST -H "Authorization: token ${{ secrets.HELM_REPO_PAT }}" \
                -H "Accept: application/vnd.github.v3+json" \
-               https://api.github.com/repos/<your-org>/helm-repo/actions/workflows/deploy-helm.yaml/dispatches \
+               https://api.github.com/repos/${{ secrets.HELM_REPO_OWNER }}/actions/workflows/deploy.yaml/dispatches \
                -d '{"ref": "main", "inputs": {"imageTag": "'${{ env.IMAGE_TAG }}'"}}'
 
