@@ -4,8 +4,8 @@ FROM eclipse-temurin:17-jdk-alpine
 # Step 2: Set the working directory inside the container
 WORKDIR /app
 
-# Step 3: Define the JAR file location (Fix for ARG issue)
-ARG JAR_FILE=target/demo-kafka-producer.jar
+# Step 3: Define the correct JAR file name
+ARG JAR_FILE=target/demo-kafka-producer-0.0.1-SNAPSHOT.jar
 ENV JAR_FILE=${JAR_FILE}
 
 # Step 4: Copy the built JAR file into the container
