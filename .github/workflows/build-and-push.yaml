@@ -55,10 +55,26 @@ jobs:
           docker push $ACR_IMAGE:$IMAGE_TAG
           docker push $ACR_IMAGE:latest
 
-      - name: Trigger Helm Deployment in `helm-repo`
+      - name: Checkout Helm Repository
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ secrets.HELM_REPO_OWNER }}/${{ secrets.HELM_REPO }}
+          token: ${{ secrets.HELM_REPO_PAT }}
+
+      - name: Update Image Tag in `kustomization.yaml`
         run: |
-          curl -X POST -H "Authorization: token ${{ secrets.HELM_REPO_PAT }}" \
-               -H "Accept: application/vnd.github.v3+json" \
-               https://api.github.com/repos/${{ secrets.HELM_REPO_OWNER }}/actions/workflows/deploy.yaml/dispatches \
-               -d '{"ref": "main", "inputs": {"imageTag": "'${{ env.IMAGE_TAG }}'"}}'
+          sed -i "s|newTag: .*|newTag: ${{ env.IMAGE_TAG }}|" kustomization.yaml
+
+      - name: Commit and Push Changes to Helm Repository
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add kustomization.yaml
+          git commit -m "Update image tag to ${{ env.IMAGE_TAG }}"
+          git push origin main
+#
+#      - name: Sync ArgoCD Application
+#        run: |
+#          argocd app sync kafka-producer-app
+#
 
