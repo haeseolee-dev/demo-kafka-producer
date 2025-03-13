@@ -63,7 +63,7 @@ jobs:
 
       - name: Update Image Tag in `kustomization.yaml`
         run: |
-          sed -i "s|newTag: .*|newTag: ${{ env.IMAGE_TAG }}|" kustomization.yaml
+          sed -i "s|newTag: .*|newTag: \"${{ env.IMAGE_TAG }}\"|" kustomization.yaml
 
       - name: Commit and Push Changes to Helm Repository
         run: |
