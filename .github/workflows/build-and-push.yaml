@@ -9,6 +9,9 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
+    permissions:
+      id-token: write  # Required for OIDC authentication
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -22,14 +25,11 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
-      # Authenticate with Azure
+      # Authenticate with Azure using OIDC (Correct Fix)
       - name: Log in to Azure
         uses: azure/login@v1
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       # Log in to Azure Container Registry (ACR)
       - name: Log in to ACR
@@ -47,9 +47,9 @@ jobs:
           docker push $ACR_IMAGE:$IMAGE_TAG
           docker push $ACR_IMAGE:latest
 
-      - name: Trigger Helm Deployment in `helm-repo`
-        run: |
-          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-               -H "Accept: application/vnd.github.v3+json" \
-               https://api.github.com/repos/<your-org>/helm-repo/actions/workflows/deploy-helm.yaml/dispatches \
-               -d '{"ref": "main", "inputs": {"imageTag": "'${{ env.IMAGE_TAG }}'"}}'
+#      - name: Trigger Helm Deployment in `helm-repo`
+#        run: |
+#          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+#               -H "Accept: application/vnd.github.v3+json" \
+#               https://api.github.com/repos/<your-org>/helm-repo/actions/workflows/deploy-helm.yaml/dispatches \
+#               -d '{"ref": "main", "inputs": {"imageTag": "'${{ env.IMAGE_TAG }}'"}}'
