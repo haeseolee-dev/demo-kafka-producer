@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+env:
+  IMAGE_TAG: $(date +%Y%m%d%H%M%S)
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -39,7 +42,6 @@ jobs:
         env:
           DOCKER_BUILDKIT: 0  # Disable BuildKit
         run: |
-          IMAGE_TAG=$(date +%Y%m%d%H%M%S)
           ACR_IMAGE=${{ secrets.ACR_LOGIN_SERVER }}/demo-kafka-producer
           JAR_FILE="target/demo-kafka-producer-0.0.1-SNAPSHOT.jar"
           
@@ -68,16 +70,24 @@ jobs:
           path: .
 
       - name: Update `kustomization.yaml`
+        env:
+          ACR_IMAGE_NAME: ${{ secrets.ACR_LOGIN_SERVER }}/demo-kafka-producer
         run: |
           cd overlays/dev/
-          sed -i "s|newTag: .*|newTag: \"${{ env.IMAGE_TAG }}\"|" kustomization.yaml
-          git diff
+          if grep -q "name: $ACR_IMAGE_NAME" kustomization.yaml; then
+            sed -i "s|newTag: .*|newTag: \"${{ env.IMAGE_TAG }}\"|" kustomization.yaml
+          else
+            echo "Error: Image block not found in kustomization.yaml"
+            exit 1
+          fi
+          cat kustomization.yaml
 
       - name: Commit and Push Changes
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "github-actions"
-          git commit -am "Update image tag to ${{ env.IMAGE_TAG }}"
+          git add overlays/dev/kustomization.yaml
+          git commit -m "Update image tag to ${{ env.IMAGE_TAG }}"
           git push origin main
 
 
