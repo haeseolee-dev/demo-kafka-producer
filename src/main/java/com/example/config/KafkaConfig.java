@@ -26,6 +26,10 @@ public class KafkaConfig {
         );
     }
 
+    public void setAutoOffsetReset(String autoOffsetReset) {
+        this.autoOffsetReset = autoOffsetReset;
+    }
+
     public String getBootstrapServers() { return bootstrapServers; }
     public String getJaasUser() { return jaasUser; }
     public String getJaasPassword() { return jaasPassword; }
