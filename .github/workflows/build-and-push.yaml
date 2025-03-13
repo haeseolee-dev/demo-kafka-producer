@@ -23,7 +23,7 @@ jobs:
           java-version: '17'
 
       - name: Build with Maven
-        run: mvn clean package -DskipTests
+        run: mvn clean package -DskipTests -P production
 
       # Authenticate with Azure using OIDC (Correct Fix)
       - name: Log in to Azure
@@ -39,11 +39,16 @@ jobs:
         run: |
           IMAGE_TAG=$(date +%Y%m%d%H%M%S)
           ACR_IMAGE=${{ secrets.ACR_LOGIN_SERVER }}/demo-kafka-producer
-
-          docker build -t $ACR_IMAGE:$IMAGE_TAG .
+          
+          # Ensure the JAR file exists before Docker build
+          ls -l target/
+          
+          # Build the Docker image with the correct context
+          docker build --build-arg JAR_FILE=target/demo-kafka-producer.jar -t $ACR_IMAGE:$IMAGE_TAG .
+          
           docker tag $ACR_IMAGE:$IMAGE_TAG $ACR_IMAGE:latest
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-
+          
           docker push $ACR_IMAGE:$IMAGE_TAG
           docker push $ACR_IMAGE:latest
 

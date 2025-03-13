@@ -5,7 +5,8 @@ FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /app
 
 # Step 3: Copy the built JAR file into the container
-COPY target/demo-kafka-producer.jar /app/demo-kafka-producer.jar
+ARG JAR_FILE
+COPY ${JAR_FILE} /app/demo-kafka-producer.jar
 
 # Step 4: Expose the application port (Spring Boot default is 8080)
 EXPOSE 8080
