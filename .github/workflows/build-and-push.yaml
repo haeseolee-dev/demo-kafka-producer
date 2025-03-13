@@ -55,9 +55,10 @@ jobs:
           docker push $ACR_IMAGE:$IMAGE_TAG
           docker push $ACR_IMAGE:latest
 
-#      - name: Trigger Helm Deployment in `helm-repo`
-#        run: |
-#          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-#               -H "Accept: application/vnd.github.v3+json" \
-#               https://api.github.com/repos/<your-org>/helm-repo/actions/workflows/deploy-helm.yaml/dispatches \
-#               -d '{"ref": "main", "inputs": {"imageTag": "'${{ env.IMAGE_TAG }}'"}}'
+      - name: Trigger Helm Deployment in `helm-repo`
+        run: |
+          curl -X POST -H "Authorization: token ${{ secrets.HELM_REPO_PAT }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               https://api.github.com/repos/<your-org>/helm-repo/actions/workflows/deploy-helm.yaml/dispatches \
+               -d '{"ref": "main", "inputs": {"imageTag": "'${{ env.IMAGE_TAG }}'"}}'
+
