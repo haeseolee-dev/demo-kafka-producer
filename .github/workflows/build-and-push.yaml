@@ -86,5 +86,6 @@ jobs:
           git config --global user.email "github-actions@github.com"
           git config --global user.name "github-actions"
           git add overlays/dev/kustomization.yaml
+          echo "Image tag: ${{ env.IMAGE_TAG }}"
           git commit -m "fix: update image tag to ${{ env.IMAGE_TAG }}"
           git push origin main
