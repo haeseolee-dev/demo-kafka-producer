@@ -29,6 +29,36 @@ public class KafkaConfig {
     public void setAutoOffsetReset(String autoOffsetReset) {
         this.autoOffsetReset = autoOffsetReset;
     }
+    public void setBootstrapServers(String bootstrapServers) {
+        this.bootstrapServers = bootstrapServers;
+    }
+    public void setJaasUser(String jaasUser) {
+        this.jaasUser = jaasUser;
+    }
+    public void setJaasPassword(String jaasPassword) {
+        this.jaasPassword = jaasPassword;
+    }
+    public void setTopics(Topics topics) {
+        this.topics = topics;
+    }
+    public void setSeekTo(String seekTo) {
+        this.seekTo = seekTo;
+    }
+    public void setSecurity(Security security) {
+        this.security = security;
+    }
+    public void setProperties(ProducerProperties properties) {
+        this.properties = properties;
+    }
+    public void setMaxPollRecords(String maxPollRecords) {
+        this.maxPollRecords = maxPollRecords;
+    }
+    public void setConsumersCount(String consumersCount) {
+        this.consumersCount = consumersCount;
+    }
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
+    }
 
     public String getBootstrapServers() { return bootstrapServers; }
     public String getJaasUser() { return jaasUser; }
