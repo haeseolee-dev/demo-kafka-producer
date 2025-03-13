@@ -12,6 +12,9 @@ jobs:
     permissions:
       id-token: write  # Required for OIDC authentication
 
+    outputs:
+      image_tag: ${{ steps.set_image_tag.outputs.image_tag }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -22,8 +25,9 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Generate Image Tag ✅
-        run: echo "IMAGE_TAG=$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
+      - name: Generate Image Tag
+        id: set_image_tag  
+        run: echo "image_tag=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
 
       - name: Build with Maven
         run: mvn clean package -DskipTests -P production
@@ -49,11 +53,11 @@ jobs:
           ls -l target/
           
           # Build the Docker image
-          docker build --build-arg JAR_FILE=$JAR_FILE -t $ACR_IMAGE:$IMAGE_TAG .
+          docker build --build-arg JAR_FILE=$JAR_FILE -t $ACR_IMAGE:${{ steps.set_image_tag.outputs.image_tag }} .
           
-          docker tag $ACR_IMAGE:$IMAGE_TAG $ACR_IMAGE:latest
+          docker tag $ACR_IMAGE:${{ steps.set_image_tag.outputs.image_tag }} $ACR_IMAGE:latest
           
-          docker push $ACR_IMAGE:$IMAGE_TAG
+          docker push $ACR_IMAGE:${{ steps.set_image_tag.outputs.image_tag }}
           docker push $ACR_IMAGE:latest
 
   update-kustomize:
@@ -71,10 +75,11 @@ jobs:
       - name: Update `kustomization.yaml`
         env:
           ACR_IMAGE_NAME: ${{ secrets.ACR_LOGIN_SERVER }}/demo-kafka-producer
+          IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
         run: |
           cd overlays/dev/
           if grep -q "name: $ACR_IMAGE_NAME" kustomization.yaml; then
-            sed -i "s|newTag: .*|newTag: \"${{ env.IMAGE_TAG }}\"|" kustomization.yaml
+            sed -i "s|newTag: .*|newTag: \"$IMAGE_TAG\"|" kustomization.yaml
           else
             echo "Error: Image block not found in kustomization.yaml"
             exit 1
@@ -86,6 +91,5 @@ jobs:
           git config --global user.email "github-actions@github.com"
           git config --global user.name "github-actions"
           git add overlays/dev/kustomization.yaml
-          echo "Image tag: ${{ env.IMAGE_TAG }}"
-          git commit -m "fix: update image tag to ${{ env.IMAGE_TAG }}"
+          git commit -m "Update image tag to ${{ needs.build-and-push.outputs.image_tag }}"
           git push origin main
